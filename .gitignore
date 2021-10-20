@@ -157,3 +157,10 @@ cython_debug/
 deeptemp
 datastore
 logs/
+sharedfiles/face_lite.pt
+sharedfiles/face.pt
+sharedfiles/facerec-high.model
+sharedfiles/scene.model
+sharedfiles/scene.pt
+sharedfiles/yolov5m.pt
+sharedfiles/yolov5s.pt
