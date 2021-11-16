@@ -155,6 +155,13 @@ cython_debug/
 *.out
 
 deeptemp
+/.vs
 datastore
 logs/
-/.vs
+sharedfiles/face_lite.pt
+sharedfiles/face.pt
+sharedfiles/facerec-high.model
+sharedfiles/scene.model
+sharedfiles/scene.pt
+sharedfiles/yolov5m.pt
+sharedfiles/yolov5s.pt
