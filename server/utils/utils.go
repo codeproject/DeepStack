@@ -103,6 +103,7 @@ func AddFileToZip(zipWriter *zip.Writer, filename string, outname string) error 
 	if err != nil {
 		return err
 	}
+
 	_, err = io.Copy(writer, fileToZip)
 	return err
 }
@@ -119,16 +120,19 @@ func ReadRegisteryEntry() string {
 
 func LogToServer(sub_data *structures.ActivationData) {
 
-	for true {
+    ET_phone_home := false // SECURITY: (CM 16Nov21) Sorry, but no.
+
+	for ET_phone_home {
 
 		h, _ := host.Info()
 		c, _ := cpu.Info()
 
-		platform := h.Platform
-		os := h.OS
+		platform  := h.Platform
+		os        := h.OS
 		osversion := h.PlatformVersion
 		num_cores := len(c)
-		cpu := ""
+		cpu       := ""
+
 		for _, v := range c {
 			cpu = v.ModelName
 			break
@@ -146,9 +150,7 @@ func LogToServer(sub_data *structures.ActivationData) {
 
 		req.Post("https://register.deepstack.cc/loguser", params)
 		time.Sleep(86400 * time.Second)
-
 	}
-
 }
 
 // extend to support custom models

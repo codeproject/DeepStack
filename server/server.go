@@ -93,7 +93,6 @@ func scene(c *gin.Context) {
 				return
 
 			}
-			break
 
 		} else if duration > request_timeout {
 
@@ -160,7 +159,6 @@ func detection(c *gin.Context, queue_name string) {
 				return
 			}
 
-			break
 		} else if duration > request_timeout {
 
 			final_res := response.ErrorResponse{Success: false, Error: "failed to process request before timeout"}
@@ -285,7 +283,6 @@ func facerecognition(c *gin.Context) {
 				return
 			}
 
-			break
 		} else if duration > request_timeout {
 
 			final_res := response.ErrorResponse{Success: false, Error: "failed to process request before timeout"}
@@ -350,7 +347,6 @@ func faceregister(c *gin.Context) {
 				return
 			}
 
-			break
 		} else if duration > request_timeout {
 
 			final_res := response.ErrorResponse{Success: false, Error: "failed to process request before timeout"}
@@ -371,8 +367,10 @@ func facematch(c *gin.Context) {
 
 	if form != nil {
 		for filename, _ := range form.File {
+
 			file, _ := c.FormFile(filename)
-			img_id := uuid.NewV4().String()
+			img_id  := uuid.NewV4().String()
+
 			c.SaveUploadedFile(file, filepath.Join(temp_path, img_id))
 
 			user_images = append(user_images, img_id)
@@ -392,7 +390,7 @@ func facematch(c *gin.Context) {
 	for true {
 
 		output, _ := redis_client.Get(req_id).Result()
-		duration := time.Since(t1).Seconds()
+		duration  := time.Since(t1).Seconds()
 
 		if output != "" {
 
@@ -413,7 +411,6 @@ func facematch(c *gin.Context) {
 				return
 			}
 
-			break
 		} else if duration > request_timeout {
 
 			final_res := response.ErrorResponse{Success: false, Error: "failed to process request before timeout"}
@@ -465,14 +462,11 @@ func deleteface(c *gin.Context) {
 	face2 := os.Getenv("VISION-FACE2")
 
 	if face2 == "True" {
-
 		TB_EMBEDDINGS = "TB_EMBEDDINGS2"
-
 	}
 
 	trans, _ := db.Begin()
-
-	stmt, _ := trans.Prepare(fmt.Sprintf("DELETE FROM %s WHERE userid=?", TB_EMBEDDINGS))
+	stmt, _  := trans.Prepare(fmt.Sprintf("DELETE FROM %s WHERE userid=?", TB_EMBEDDINGS))
 
 	defer stmt.Close()
 
@@ -489,25 +483,23 @@ func deleteface(c *gin.Context) {
 
 func register_model(c *gin.Context) {
 
-	model_file, _ := c.FormFile("model")
+	model_file, _   := c.FormFile("model")
+	config_file, _  := c.FormFile("config")
+	model_name      := c.PostForm("name")
 
-	config_file, _ := c.FormFile("config")
-
-	model_name := c.PostForm("name")
-
-	MODEL_DIR := DATA_DIR + "/models/vision/" + model_name + "/"
+	MODEL_DIR       := DATA_DIR + "/models/vision/" + model_name + "/"
 
 	model_exists, _ := utils.PathExists(MODEL_DIR)
-	message := "model updated"
-	if model_exists == false {
+	message         := "model updated"
 
+	if model_exists == false {
 		os.MkdirAll(MODEL_DIR, os.ModePerm)
 		message = "model registered"
-
 	}
 
 	c.SaveUploadedFile(model_file, MODEL_DIR+"model.pb")
 	c.SaveUploadedFile(config_file, MODEL_DIR+"config.json")
+
 	res := response.ModelRegisterResponse{Success: true, Message: message}
 
 	c.JSON(200, res)
@@ -526,7 +518,6 @@ func delete_model(c *gin.Context) {
 
 	c.JSON(200, res)
 	return
-
 }
 
 func list_models(c *gin.Context) {
@@ -539,16 +530,13 @@ func list_models(c *gin.Context) {
 
 		for _, file := range model_list {
 
-			model_name := filepath.Base(file)
+			model_name  := filepath.Base(file)
 			fileStat, _ := os.Stat(file + "/model.pb")
-			size := float32(fileStat.Size()) / (1000 * 1000)
-
-			model_info := structures.ModelInfo{Name: model_name, Dateupdated: fileStat.ModTime(), Modelsize: size}
+			size        := float32(fileStat.Size()) / (1000 * 1000)
+			model_info  := structures.ModelInfo{Name: model_name, Dateupdated: fileStat.ModTime(), Modelsize: size}
 
 			models = append(models, model_info)
-
 		}
-
 	}
 
 	res := structures.AllModels{Models: models, Success: true}
@@ -556,7 +544,6 @@ func list_models(c *gin.Context) {
 	c.JSON(200, res)
 
 	return
-
 }
 
 func single_request_loop(c *gin.Context, queue_name string) {
@@ -598,8 +585,6 @@ func single_request_loop(c *gin.Context, queue_name string) {
 				return
 
 			}
-
-			break
 		}
 
 		time.Sleep(1 * time.Millisecond)
@@ -625,9 +610,7 @@ func backup(c *gin.Context) {
 
 			utils.AddFileToZip(zip_archive, path.Join(file, "model.pb"), "models/vision/"+model_name+"/model.pb")
 			utils.AddFileToZip(zip_archive, path.Join(file, "config.json"), "models/vision/"+model_name+"/config.json")
-
 		}
-
 	}
 
 	utils.AddFileToZip(zip_archive, DATA_DIR+"/faceembedding.db", "faceembedding.db")
@@ -636,11 +619,9 @@ func backup(c *gin.Context) {
 	output_file.Close()
 
 	data_file, _ := os.Open(temp_path + "/" + file_id)
-
-	info, err := os.Stat(temp_path + "/" + file_id)
+	info, err    := os.Stat(temp_path + "/" + file_id)
 
 	if err != nil {
-
 		fmt.Println(err)
 	}
 
@@ -648,12 +629,11 @@ func backup(c *gin.Context) {
 
 	contentType := "application/octet-stream"
 
-	extraHeaders := map[string]string{
+	extraHeaders := map[string]string {
 		"Content-Disposition": "attachment; filename=" + backup_name,
 	}
 
 	c.DataFromReader(200, contentLength, contentType, data_file, extraHeaders)
-
 }
 
 func restore(c *gin.Context) {
@@ -694,7 +674,6 @@ func restore(c *gin.Context) {
 
 		_, err = io.Copy(outFile, data)
 		outFile.Close()
-
 	}
 
 	res := response.RestoreResponse{Success: true}
@@ -702,7 +681,6 @@ func restore(c *gin.Context) {
 	c.JSON(200, res)
 
 	return
-
 }
 
 func printfromprocess(cmd *exec.Cmd) {
@@ -711,53 +689,47 @@ func printfromprocess(cmd *exec.Cmd) {
 
 		out, err := cmd.StdoutPipe()
 		if err == nil {
-
 			outData, _ := ioutil.ReadAll(out)
 			fmt.Println(string(outData))
 			time.Sleep(1 * time.Second)
-
 		}
-
 	}
-
 }
 
 func printlogs() {
 
-	face1 := os.Getenv("VISION-FACE")
-	face2 := os.Getenv("VISION-FACE2")
+	face1     := os.Getenv("VISION-FACE")
+	face2     := os.Getenv("VISION-FACE2")
 	detection := os.Getenv("VISION-DETECTION")
-	scene := os.Getenv("VISION-SCENE")
+	scene     := os.Getenv("VISION-SCENE")
 
 	if face1 == "True" || face2 == "True" {
 
+		fmt.Println()
+		fmt.Println("Face detection APIs available")
+		fmt.Println("---------------------------------------")
 		fmt.Println("/v1/vision/face")
-		fmt.Println("---------------------------------------")
 		fmt.Println("/v1/vision/face/recognize")
-		fmt.Println("---------------------------------------")
 		fmt.Println("/v1/vision/face/register")
-		fmt.Println("---------------------------------------")
 		fmt.Println("/v1/vision/face/match")
-		fmt.Println("---------------------------------------")
 		fmt.Println("/v1/vision/face/list")
-		fmt.Println("---------------------------------------")
 		fmt.Println("/v1/vision/face/delete")
-		fmt.Println("---------------------------------------")
-
 	}
 
 	if detection == "True" {
 
-		fmt.Println("/v1/vision/detection")
+		fmt.Println()
+		fmt.Println("Vision detection APIs available")
 		fmt.Println("---------------------------------------")
-
+		fmt.Println("/v1/vision/detection")
 	}
 
 	if scene == "True" {
 
-		fmt.Println("/v1/vision/scene")
+		fmt.Println()
+		fmt.Println("Scene detection APIs available")
 		fmt.Println("---------------------------------------")
-
+		fmt.Println("/v1/vision/scene")
 	}
 
 	models, err := filepath.Glob(DATA_DIR + "/models/vision/*")
@@ -766,17 +738,20 @@ func printlogs() {
 
 	if err == nil && custom == "True" {
 
+		fmt.Println()
+		fmt.Println("Custom vision APIs available")
+		fmt.Println("---------------------------------------")
+
 		for _, file := range models {
 			model_name := filepath.Base(file)
 			fmt.Println("v1/vision/custom/" + model_name)
-			fmt.Println("---------------------------------------")
 		}
-
 	}
 
+	fmt.Println()
+	fmt.Println("Maintenance APIs available")
 	fmt.Println("---------------------------------------")
 	fmt.Println("v1/backup")
-	fmt.Println("---------------------------------------")
 	fmt.Println("v1/restore")
 
 }
@@ -789,16 +764,18 @@ func home(c *gin.Context) {
 
 func initActivation() {
 
-	face := os.Getenv("VISION_FACE")
+	face      := os.Getenv("VISION_FACE")
 	detection := os.Getenv("VISION_DETECTION")
-	scene := os.Getenv("VISION_SCENE")
+	scene     := os.Getenv("VISION_SCENE")
 
 	if os.Getenv("VISION-FACE") == "" {
 		os.Setenv("VISION-FACE", face)
 	}
+
 	if os.Getenv("VISION-DETECTION") == "" {
 		os.Setenv("VISION-DETECTION", detection)
 	}
+
 	if os.Getenv("VISION-SCENE") == "" {
 		os.Setenv("VISION-SCENE", scene)
 	}
@@ -844,14 +821,14 @@ func main() {
 		fmt.Println("DeepStack: Version " + version)
 	}
 
-	flag.StringVar(&visionFace, "VISION-FACE", os.Getenv("VISION-FACE"), "enable face detection")
-	flag.StringVar(&visionDetection, "VISION-DETECTION", os.Getenv("VISION-DETECTION"), "enable object detection")
-	flag.StringVar(&visionScene, "VISION-SCENE", os.Getenv("VISION-SCENE"), "enable scene recognition")
-	flag.StringVar(&apiKey, "API-KEY", os.Getenv("API-KEY"), "api key to secure endpoints")
-	flag.StringVar(&adminKey, "ADMIN-KEY", os.Getenv("ADMIN-KEY"), "admin key to secure admin endpoints")
-	flag.StringVar(&modelStoreDetection, "MODELSTORE-DETECTION", "/modelstore/detection/", "path to custom detection models")
-	flag.Float64Var(&request_timeout, "TIMEOUT", 60, "request timeout in seconds")
-	flag.StringVar(&mode, "MODE", "Medium", "performance mode")
+	flag.StringVar(&visionFace,          "VISION-FACE",      os.Getenv("VISION-FACE"),      "enable face detection")
+	flag.StringVar(&visionDetection,     "VISION-DETECTION", os.Getenv("VISION-DETECTION"), "enable object detection")
+	flag.StringVar(&visionScene,         "VISION-SCENE",     os.Getenv("VISION-SCENE"),     "enable scene recognition")
+	flag.StringVar(&apiKey,              "API-KEY",          os.Getenv("API-KEY"),          "api key to secure endpoints")
+	flag.StringVar(&adminKey,            "ADMIN-KEY",        os.Getenv("ADMIN-KEY"),        "admin key to secure admin endpoints")
+	flag.StringVar(&modelStoreDetection, "MODELSTORE-DETECTION", "/modelstore/detection/",  "path to custom detection models")
+	flag.Float64Var(&request_timeout,    "TIMEOUT",          60,                            "request timeout in seconds")
+	flag.StringVar(&mode,                "MODE",             "Medium",                      "performance mode")
 
 	getPort := os.Getenv("PORT")
 	intPortVal, err := strconv.Atoi(getPort)
@@ -869,18 +846,18 @@ func main() {
 		modelStoreDetection = modelStoreDetection + "/"
 	}
 
-	APPDIR := os.Getenv("APPDIR")
+	APPDIR  := os.Getenv("APPDIR")
 	DATA_DIR = os.Getenv("DATA_DIR")
 
 	startedProcesses := make([]*exec.Cmd, 0)
 
 	redis_server := "redis-server"
-	interpreter := "python3"
+	interpreter  := "python3"
 
 	if PROFILE == "windows_native" {
 
-		APPDIR = "C://DeepStack"
-		interpreter = filepath.Join(APPDIR, "interpreter", "python.exe")
+		APPDIR       = "C://DeepStack"
+		interpreter  = filepath.Join(APPDIR, "interpreter", "python.exe")
 		redis_server = filepath.Join(APPDIR, "redis", "redis-server.exe")
 
 		os.Setenv("VISION-FACE", visionFace)
@@ -1043,28 +1020,20 @@ func main() {
 	go utils.LogToServer(&sub_data)
 
 	admin_key := os.Getenv("ADMIN-KEY")
-	api_key := os.Getenv("API-KEY")
+	api_key   := os.Getenv("API-KEY")
 
 	if admin_key != "" || api_key != "" {
 
 		if admin_key != "" {
-
 			settings.ADMIN_KEY = admin_key
-
 		} else {
-
 			settings.ADMIN_KEY = ""
-
 		}
 
 		if api_key != "" {
-
 			settings.API_KEY = api_key
-
 		} else {
-
 			settings.API_KEY = ""
-
 		}
 
 	}
@@ -1143,7 +1112,7 @@ func main() {
 
 	}
 
-	v1.POST("/backup", middlewares.CheckAdminKey(&sub_data, &settings), backup)
+	v1.POST("/backup",  middlewares.CheckAdminKey(&sub_data, &settings), backup)
 	v1.POST("/restore", middlewares.CheckAdminKey(&sub_data, &settings), middlewares.CheckRestore(), restore)
 
 	server.Static("/assets", "./assets")
@@ -1156,6 +1125,7 @@ func main() {
 
 	signalChannel := make(chan os.Signal, 2)
 	signal.Notify(signalChannel, os.Interrupt, syscall.SIGTERM)
+
 	go func() {
 		sig := <-signalChannel
 		if sig == syscall.SIGTERM || sig == syscall.SIGKILL {
