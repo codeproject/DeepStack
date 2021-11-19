@@ -32,17 +32,14 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var temp_path = "/deeptemp/"
-var DATA_DIR = "/datastore"
+var TEMP_PATH = "/deeptemp/"
+var DATA_DIR  = "/datastore"
+var API_KEY   = ""
 
 var db *sql.DB
-
-var API_KEY = ""
-
 var sub_key = ""
-
-var state = true
-var gpu = true
+var state   = true
+var gpu     = true
 var request_timeout = 60.0
 
 var expiring_date = time.Now()
@@ -58,7 +55,7 @@ func scene(c *gin.Context) {
 
 	file, _ := c.FormFile("image")
 
-	c.SaveUploadedFile(file, filepath.Join(temp_path, img_id))
+	c.SaveUploadedFile(file, filepath.Join(TEMP_PATH, img_id))
 
 	req_data := requests.RecognitionRequest{Imgid: img_id, Reqid: req_id, Reqtype: "scene"}
 	req_string, _ := json.Marshal(req_data)
@@ -126,7 +123,7 @@ func detection(c *gin.Context, queue_name string) {
 
 	file, _ := c.FormFile("image")
 
-	c.SaveUploadedFile(file, filepath.Join(temp_path, img_id))
+	c.SaveUploadedFile(file, filepath.Join(TEMP_PATH, img_id))
 
 	redis_client.RPush(queue_name, face_req_string)
 
@@ -190,7 +187,7 @@ func facedetection(c *gin.Context) {
 
 	face_req_string, _ := json.Marshal(face_req)
 
-	c.SaveUploadedFile(file, filepath.Join(temp_path, img_id))
+	c.SaveUploadedFile(file, filepath.Join(TEMP_PATH, img_id))
 
 	redis_client.RPush("face_queue", face_req_string)
 
@@ -249,7 +246,7 @@ func facerecognition(c *gin.Context) {
 	img_id := uuid.NewV4().String()
 	req_id := uuid.NewV4().String()
 
-	c.SaveUploadedFile(file, filepath.Join(temp_path, img_id))
+	c.SaveUploadedFile(file, filepath.Join(TEMP_PATH, img_id))
 
 	face_req := requests.FaceRecognitionRequest{Imgid: img_id, Reqtype: "recognize", Reqid: req_id, Minconfidence: threshold}
 
@@ -307,7 +304,7 @@ func faceregister(c *gin.Context) {
 		for filename, _ := range form.File {
 			file, _ := c.FormFile(filename)
 			img_id := uuid.NewV4().String()
-			c.SaveUploadedFile(file, filepath.Join(temp_path, img_id))
+			c.SaveUploadedFile(file, filepath.Join(TEMP_PATH, img_id))
 
 			user_images = append(user_images, img_id)
 		}
@@ -371,7 +368,7 @@ func facematch(c *gin.Context) {
 			file, _ := c.FormFile(filename)
 			img_id  := uuid.NewV4().String()
 
-			c.SaveUploadedFile(file, filepath.Join(temp_path, img_id))
+			c.SaveUploadedFile(file, filepath.Join(TEMP_PATH, img_id))
 
 			user_images = append(user_images, img_id)
 		}
@@ -553,7 +550,7 @@ func single_request_loop(c *gin.Context, queue_name string) {
 
 	file, _ := c.FormFile("image")
 
-	c.SaveUploadedFile(file, filepath.Join(temp_path, img_id))
+	c.SaveUploadedFile(file, filepath.Join(TEMP_PATH, img_id))
 
 	req_data := requests.RecognitionRequest{Imgid: img_id, Reqid: req_id, Reqtype: "custom"}
 	req_string, _ := json.Marshal(req_data)
@@ -596,7 +593,7 @@ func backup(c *gin.Context) {
 	file_id := uuid.NewV4().String() + ".zip"
 	backup_name := "Backup_" + time.Now().Format("2006-01-02T15:04:05") + ".backup"
 
-	output_file, _ := os.Create(temp_path + "/" + file_id)
+	output_file, _ := os.Create(TEMP_PATH + "/" + file_id)
 
 	zip_archive := zip.NewWriter(output_file)
 
@@ -618,11 +615,12 @@ func backup(c *gin.Context) {
 	zip_archive.Close()
 	output_file.Close()
 
-	data_file, _ := os.Open(temp_path + "/" + file_id)
-	info, err    := os.Stat(temp_path + "/" + file_id)
+	data_file, _ := os.Open(TEMP_PATH + "/" + file_id)
+	info, err    := os.Stat(TEMP_PATH + "/" + file_id)
 
 	if err != nil {
-		fmt.Println(err)
+		fmt.Print(err)
+		fmt.Print("\r\n")
 	}
 
 	contentLength := info.Size()
@@ -640,7 +638,7 @@ func restore(c *gin.Context) {
 
 	backup_file, _ := c.FormFile("file")
 
-	backup_path := temp_path + "/deepstack.backup"
+	backup_path := TEMP_PATH + "/deepstack.backup"
 	c.SaveUploadedFile(backup_file, backup_path)
 	defer os.Remove(backup_path)
 
@@ -663,7 +661,8 @@ func restore(c *gin.Context) {
 		data, err := f.Open()
 		if err != nil {
 
-			fmt.Println(err)
+			fmt.Print(err)
+			fmt.Print("\r\n")
 		}
 
 		fpath := path.Join(DATA_DIR, f_path)
@@ -690,7 +689,7 @@ func printfromprocess(cmd *exec.Cmd) {
 		out, err := cmd.StdoutPipe()
 		if err == nil {
 			outData, _ := ioutil.ReadAll(out)
-			fmt.Println(string(outData))
+			fmt.Print(string(outData) + "\r\n")
 			time.Sleep(1 * time.Second)
 		}
 	}
@@ -705,31 +704,31 @@ func printlogs() {
 
 	if face1 == "True" || face2 == "True" {
 
-		fmt.Println()
-		fmt.Println("Face detection APIs available")
-		fmt.Println("---------------------------------------")
-		fmt.Println("/v1/vision/face")
-		fmt.Println("/v1/vision/face/recognize")
-		fmt.Println("/v1/vision/face/register")
-		fmt.Println("/v1/vision/face/match")
-		fmt.Println("/v1/vision/face/list")
-		fmt.Println("/v1/vision/face/delete")
+		fmt.Print("\r\n")
+		fmt.Print("Face detection APIs available\r\n")
+		fmt.Print("---------------------------------------\r\n")
+		fmt.Print("/v1/vision/face\r\n")
+		fmt.Print("/v1/vision/face/recognize\r\n")
+		fmt.Print("/v1/vision/face/register\r\n")
+		fmt.Print("/v1/vision/face/match\r\n")
+		fmt.Print("/v1/vision/face/list\r\n")
+		fmt.Print("/v1/vision/face/delete\r\n")
 	}
 
 	if detection == "True" {
 
-		fmt.Println()
-		fmt.Println("Vision detection APIs available")
-		fmt.Println("---------------------------------------")
-		fmt.Println("/v1/vision/detection")
+		fmt.Print("\r\n")
+		fmt.Print("Vision detection APIs available\r\n")
+		fmt.Print("---------------------------------------\r\n")
+		fmt.Print("/v1/vision/detection\r\n")
 	}
 
 	if scene == "True" {
 
-		fmt.Println()
-		fmt.Println("Scene detection APIs available")
-		fmt.Println("---------------------------------------")
-		fmt.Println("/v1/vision/scene")
+		fmt.Print("\r\n")
+		fmt.Print("Scene detection APIs available\r\n")
+		fmt.Print("---------------------------------------\r\n")
+		fmt.Print("/v1/vision/scene\r\n")
 	}
 
 	models, err := filepath.Glob(DATA_DIR + "/models/vision/*")
@@ -738,21 +737,21 @@ func printlogs() {
 
 	if err == nil && custom == "True" {
 
-		fmt.Println()
-		fmt.Println("Custom vision APIs available")
-		fmt.Println("---------------------------------------")
+		fmt.Print("\r\n")
+		fmt.Print("Custom vision APIs available\r\n")
+		fmt.Print("---------------------------------------\r\n")
 
 		for _, file := range models {
 			model_name := filepath.Base(file)
-			fmt.Println("v1/vision/custom/" + model_name)
+			fmt.Print("v1/vision/custom/" + model_name + "\r\n")
 		}
 	}
 
-	fmt.Println()
-	fmt.Println("Maintenance APIs available")
-	fmt.Println("---------------------------------------")
-	fmt.Println("v1/backup")
-	fmt.Println("v1/restore")
+	fmt.Print("\r\n")
+	fmt.Print("Maintenance APIs available\r\n")
+	fmt.Print("---------------------------------------\r\n")
+	fmt.Print("v1/backup\r\n")
+	fmt.Print("v1/restore\r\n")
 
 }
 
@@ -798,8 +797,16 @@ func main() {
 	var modelStoreDetection string
 	var mode string
 
-	if os.Getenv("PROFILE") == "" {
-		os.Chdir("C://DeepStack//server")
+	// Get initial variables so we can get started
+	PROFILE  := os.Getenv("PROFILE")
+	APPDIR   := os.Getenv("APPDIR")
+	if APPDIR == "" {
+		APPDIR = "C://DeepStack"
+	}
+
+	os.Chdir(APPDIR)
+
+	if PROFILE == "" {
 		platformdata, err := ioutil.ReadFile("platform.json")
 
 		if err == nil {
@@ -807,19 +814,42 @@ func main() {
 
 			json.Unmarshal(platformdata, &platform)
 
-			os.Setenv("PROFILE", platform.PROFILE)
+			os.Setenv("PROFILE",   platform.PROFILE)
 			os.Setenv("CUDA_MODE", platform.CUDA_MODE)
+
+			PROFILE = platform.PROFILE
 		}
 	}
 
-	versionfile, err := os.Open("version.txt")
+	// Now get the rest of the environment settings
+	PORT     := os.Getenv("PORT")
 
-	if err == nil {
-		versiondata, _ := ioutil.ReadAll(versionfile)
-		version := string(versiondata)
-
-		fmt.Println("DeepStack: Version " + version)
+	DATA_DIR := os.Getenv("DATA_DIR")
+	if DATA_DIR == "" {
+		if PROFILE == "windows_native" {
+			DATA_DIR = filepath.Join(os.Getenv("LocalAppData"), "DeepStack")
+		} else {
+			DATA_DIR = "/datastore/"
+		}
 	}
+
+	TEMP_PATH = os.Getenv("TEMP_PATH")
+	if TEMP_PATH == "" {
+		if PROFILE == "windows_native" {
+			TEMP_PATH = filepath.Join(os.TempDir(), "DeepStack")
+		} else {
+			TEMP_PATH = "/deeptemp/"
+		}
+	}
+
+	logdir := filepath.Join(APPDIR, "logs")
+	if PROFILE == "windows_native" {
+		os.Setenv("DATA_DIR",  DATA_DIR)
+		os.Setenv("TEMP_PATH", TEMP_PATH)
+		logdir = filepath.Join(DATA_DIR, "logs")
+	}
+
+	// Command line paramters
 
 	flag.StringVar(&visionFace,          "VISION-FACE",      os.Getenv("VISION-FACE"),      "enable face detection")
 	flag.StringVar(&visionDetection,     "VISION-DETECTION", os.Getenv("VISION-DETECTION"), "enable object detection")
@@ -830,8 +860,7 @@ func main() {
 	flag.Float64Var(&request_timeout,    "TIMEOUT",          60,                            "request timeout in seconds")
 	flag.StringVar(&mode,                "MODE",             "Medium",                      "performance mode")
 
-	getPort := os.Getenv("PORT")
-	intPortVal, err := strconv.Atoi(getPort)
+	intPortVal, err := strconv.Atoi(PORT)
 	if err != nil {
 		flag.IntVar(&port, "PORT", 5000, "port")
 	} else {
@@ -840,14 +869,18 @@ func main() {
 
 	flag.Parse()
 
-	PROFILE := os.Getenv("PROFILE")
-
 	if !strings.HasSuffix(modelStoreDetection, "/") {
 		modelStoreDetection = modelStoreDetection + "/"
 	}
 
-	APPDIR  := os.Getenv("APPDIR")
-	DATA_DIR = os.Getenv("DATA_DIR")
+	versionfile, err := os.Open("version.txt")
+
+	if err == nil {
+		versiondata, _ := ioutil.ReadAll(versionfile)
+		version := string(versiondata)
+
+		fmt.Print("DeepStack: Version " + version + "\r\n")
+	}
 
 	startedProcesses := make([]*exec.Cmd, 0)
 
@@ -856,40 +889,14 @@ func main() {
 
 	if PROFILE == "windows_native" {
 
-		APPDIR       = "C://DeepStack"
-		interpreter  = filepath.Join(APPDIR, "interpreter", "python.exe")
+		interpreter  = filepath.Join(APPDIR, "intelligence\\venv\\Scripts", "python.exe")
 		redis_server = filepath.Join(APPDIR, "redis", "redis-server.exe")
 
-		os.Setenv("VISION-FACE", visionFace)
+		os.Setenv("VISION-FACE",      visionFace)
 		os.Setenv("VISION-DETECTION", visionDetection)
-		os.Setenv("VISION-SCENE", visionScene)
-		os.Setenv("APPDIR", APPDIR)
-		os.Setenv("MODE", mode)
-	}
-
-	if DATA_DIR == "" {
-		DATA_DIR = "/datastore"
-
-		if PROFILE == "windows_native" {
-			DATA_DIR = filepath.Join(os.Getenv("LocalAppData"), "DeepStack")
-		}
-	}
-
-	temp_path = os.Getenv("TEMP_PATH")
-	if temp_path == "" {
-		temp_path = "/deeptemp/"
-
-		if PROFILE == "windows_native" {
-			temp_path = filepath.Join(os.TempDir(), "DeepStack")
-		}
-	}
-
-	logdir := filepath.Join(APPDIR, "logs")
-
-	if PROFILE == "windows_native" {
-		os.Setenv("DATA_DIR", DATA_DIR)
-		os.Setenv("TEMP_PATH", temp_path)
-		logdir = filepath.Join(DATA_DIR, "logs")
+		os.Setenv("VISION-SCENE",     visionScene)
+		os.Setenv("APPDIR",           APPDIR)
+		os.Setenv("MODE",             mode)
 	}
 
 	request_timeout_str := os.Getenv("TIMEOUT")
@@ -899,12 +906,12 @@ func main() {
 		request_timeout = request_timeout_val
 	}
 
-	os.Mkdir(logdir, 0755)
-	os.Mkdir(DATA_DIR, 0755)
-	os.Mkdir(temp_path, 0755)
+	os.Mkdir(logdir,    0755)
+	os.Mkdir(DATA_DIR,  0755)
+	os.Mkdir(TEMP_PATH, 0755)
 
 	if PROFILE == "windows_native" {
-		go utils.CreateDirs(logdir, DATA_DIR, temp_path)
+		go utils.CreateDirs(logdir, DATA_DIR, TEMP_PATH)
 	}
 
 	stdout, _ := os.Create(filepath.Join(logdir, "stdout.txt"))
@@ -917,16 +924,16 @@ func main() {
 
 	ctx := context.TODO()
 
-	initScript := filepath.Join(APPDIR, "init.py")
+	initScript      := filepath.Join(APPDIR, "init.py")
 	detectionScript := filepath.Join(APPDIR, "intelligencelayer/shared/detection.py")
-	faceScript := filepath.Join(APPDIR, "intelligencelayer/shared/face.py")
-	sceneScript := filepath.Join(APPDIR, "intelligencelayer/shared/scene.py")
+	faceScript      := filepath.Join(APPDIR, "intelligencelayer/shared/face.py")
+	sceneScript     := filepath.Join(APPDIR, "intelligencelayer/shared/scene.py")
 
 	initcmd := exec.CommandContext(ctx, "bash", "-c", interpreter+" "+initScript)
 	if PROFILE == "windows_native" {
 		initcmd = exec.CommandContext(ctx, interpreter, initScript)
 	}
-	initcmd.Dir = APPDIR
+	initcmd.Dir    = APPDIR
 	initcmd.Stdout = stdout
 	initcmd.Stderr = stderr
 
@@ -1102,8 +1109,8 @@ func main() {
 
 					})
 
-					fmt.Println("---------------------------------------")
-					fmt.Println("v1/vision/custom/" + model_name)
+					fmt.Print("---------------------------------------\r\n")
+					fmt.Print("v1/vision/custom/" + model_name + "\r\n")
 
 				}
 

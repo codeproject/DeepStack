@@ -14,9 +14,7 @@ from shared.commons import preprocess
 import torchvision.transforms as transform
 from PIL import Image
 import cv2
-from intelligence.shared import TrafficModel, SceneModel, GenderModel, FaceModel,DetectModel3, 
-                                     FaceRecognitionModel, compute_distance, NudityModel, TFCustomModel,
-                                     OnnxCustomModel,KerasCustomModel
+from intelligence.shared import TrafficModel, SceneModel, GenderModel, FaceModel,DetectModel3, FaceRecognitionModel, compute_distance, NudityModel, TFCustomModel, OnnxCustomModel,KerasCustomModel
 import torch.nn.functional as F
 from shared.commons import preprocess_image
 import ast
