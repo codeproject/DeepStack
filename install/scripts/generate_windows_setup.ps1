@@ -10,11 +10,12 @@ param(
 $ErrorActionPreference = "Stop"
 
 $setup_script = "#include ""environment.iss"""
-$setup_script += "`n#define MyAppName ""DeepStack"""
+$setup_script += "`n#define MyAppName ""CodeProject Sense"""
+$setup_script += "`n#define MyAppBase ""CodeProject-Sense"""
 $setup_script += "`n#define MyAppVersion ""$Version"""
-$setup_script += "`n#define MyAppPublisher ""DeepQuestAI"""
-$setup_script += "`n#define MyAppURL ""https://www.deepstack.cc"""
-$setup_script += "`n#define MyAppExeName ""deepstack.exe"""
+$setup_script += "`n#define MyAppPublisher ""CodeProject"""
+$setup_script += "`n#define MyAppURL ""https://www.codeproject.com/AI"""
+$setup_script += "`n#define MyAppExeName ""sense.exe"""
 $setup_script += "`n#define MyAppIcon ""logo.ico"""
 
 $setup_script += "`n`n[Setup]"
@@ -28,8 +29,8 @@ $setup_script += "`nAppSupportURL={#MyAppURL}"
 $setup_script += "`nAppUpdatesURL={#MyAppURL}"
 $setup_script += "`nDefaultDirName=C:\{#MyAppName}"
 $setup_script += "`nDisableDirPage=yes"
-$setup_script += "`nDefaultGroupName=DeepStack"
-$setup_script += "`nOutputBaseFilename=DeepStack-Installer-$Platform"
+$setup_script += "`nDefaultGroupName={#MyAppPublisher}"
+$setup_script += "`nOutputBaseFilename={#MyAppBase}-Installer-$Platform"
 $setup_script += "`nCompression=lzma"
 $setup_script += "`nSolidCompression=yes"
 
@@ -65,29 +66,29 @@ $setup_script += "`nName: ""desktopicon""; Description: ""{cm:CreateDesktopIcon}
 $setup_script += "`nName: ""quicklaunchicon""; Description: ""{cm:CreateQuickLaunchIcon}""; GroupDescription: ""{cm:AdditionalIcons}""; Flags: unchecked; OnlyBelowVersion: 0,6.1"
 
 $setup_script += "`n`n[Files]"
-$setup_script += "`nSource: ""$PSScriptRoot\server\deepstack.exe""; DestDir: ""{app}""; Flags: ignoreversion"
+$setup_script += "`nSource: ""$PSScriptRoot\..\..\server\codeproject-sense.exe""; DestDir: ""{app}""; Flags: ignoreversion"
 $setup_script += "`nSource: ""$PSScriptRoot\*""; DestDir: ""{app}"";"
-$setup_script += "`nSource: ""$PSScriptRoot\intelligencelayer\*""; DestDir: ""{app}\intelligencelayer""; Flags: ignoreversion recursesubdirs createallsubdirs"
-$setup_script += "`nSource: ""$PSScriptRoot\interpreter\*""; DestDir: ""{app}\interpreter""; Flags: ignoreversion recursesubdirs createallsubdirs"
-$setup_script += "`nSource: ""$PSScriptRoot\redis\*""; DestDir: ""{app}\redis""; Flags: ignoreversion recursesubdirs createallsubdirs"
-$setup_script += "`nSource: ""$PSScriptRoot\server\*""; DestDir: ""{app}\server""; Flags: ignoreversion recursesubdirs createallsubdirs"
+$setup_script += "`nSource: ""$PSScriptRoot\..\backend\intelligencelayer\*""; DestDir: ""{app}\intelligencelayer""; Flags: ignoreversion recursesubdirs createallsubdirs"
+$setup_script += "`nSource: ""$PSScriptRoot\..\backend\python\*""; DestDir: ""{app}\python3.10""; Flags: ignoreversion recursesubdirs createallsubdirs"
+$setup_script += "`nSource: ""$PSScriptRoot\..\backend\redis\*""; DestDir: ""{app}\redis""; Flags: ignoreversion recursesubdirs createallsubdirs"
+$setup_script += "`nSource: ""$PSScriptRoot\..\..\server\*""; DestDir: ""{app}\server""; Flags: ignoreversion recursesubdirs createallsubdirs"
 if($Platform -eq "CPU"){
-    $setup_script += "`nSource: ""$PSScriptRoot\platform\platform.windows.cpu.json""; DestDir: ""{app}\server""; DestName: ""platform.json""; Flags: ignoreversion"
+    $setup_script += "`nSource: ""$PSScriptRoot\install\platform\platform.windows.cpu.json""; DestDir: ""{app}\server""; DestName: ""platform.json""; Flags: ignoreversion"
 }
 elseif ($Platform -eq "GPU") {
-    $setup_script += "`nSource: ""$PSScriptRoot\platform\platform.windows.gpu.json""; DestDir: ""{app}\server""; DestName: ""platform.json""; Flags: ignoreversion"
+    $setup_script += "`nSource: ""$PSScriptRoot\install\platform\platform.windows.gpu.json""; DestDir: ""{app}\server""; DestName: ""platform.json""; Flags: ignoreversion"
 }
-$setup_script += "`nSource: ""$PSScriptRoot\server\version.txt""; DestDir: ""{app}\server""; Flags: ignoreversion"
-$setup_script += "`nSource: ""$PSScriptRoot\sharedfiles\categories_places365.txt""; DestDir: ""{app}\sharedfiles""; Flags: ignoreversion"
-$setup_script += "`nSource: ""$PSScriptRoot\sharedfiles\face.pt""; DestDir: ""{app}\sharedfiles""; Flags: ignoreversion"
-$setup_script += "`nSource: ""$PSScriptRoot\sharedfiles\facerec-high.model""; DestDir: ""{app}\sharedfiles""; Flags: ignoreversion"
-$setup_script += "`nSource: ""$PSScriptRoot\sharedfiles\scene.pt""; DestDir: ""{app}\sharedfiles""; Flags: ignoreversion"
-$setup_script += "`nSource: ""$PSScriptRoot\sharedfiles\yolov5m.pt""; DestDir: ""{app}\sharedfiles""; Flags: ignoreversion"
+$setup_script += "`nSource: ""$PSScriptRoot\..\..\server\version.txt""; DestDir: ""{app}\server""; Flags: ignoreversion"
+$setup_script += "`nSource: ""$PSScriptRoot\..\backend\models\categories_places365.txt""; DestDir: ""{app}\models""; Flags: ignoreversion"
+$setup_script += "`nSource: ""$PSScriptRoot\..\backend\models\face.pt""; DestDir: ""{app}\models""; Flags: ignoreversion"
+$setup_script += "`nSource: ""$PSScriptRoot\..\backend\models\facerec-high.model""; DestDir: ""{app}\models""; Flags: ignoreversion"
+$setup_script += "`nSource: ""$PSScriptRoot\..\backend\models\scene.pt""; DestDir: ""{app}\models""; Flags: ignoreversion"
+$setup_script += "`nSource: ""$PSScriptRoot\..\backend\models\yolov5m.pt""; DestDir: ""{app}\models""; Flags: ignoreversion"
 if($Platform -eq "CPU"){
-    $setup_script += "`nSource: ""$PSScriptRoot\windows_packages_cpu\*""; DestDir: ""{app}\windows_packages""; Flags: ignoreversion recursesubdirs createallsubdirs"
+    $setup_script += "`nSource: ""$PSScriptRoot\install\windows_packages_cpu\*""; DestDir: ""{app}\windows_packages""; Flags: ignoreversion recursesubdirs createallsubdirs"
 } 
 elseif($Platform -eq "GPU"){
-    $setup_script += "`nSource: ""$PSScriptRoot\windows_packages_gpu\*""; DestDir: ""{app}\windows_packages""; Flags: ignoreversion recursesubdirs createallsubdirs"
+    $setup_script += "`nSource: ""$PSScriptRoot\install\windows_packages_gpu\*""; DestDir: ""{app}\windows_packages""; Flags: ignoreversion recursesubdirs createallsubdirs"
 }
 
 $setup_script += "`nSource: ""$PSScriptRoot\logo.ico""; DestDir: ""{app}""; Flags: ignoreversion"

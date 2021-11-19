@@ -42,14 +42,15 @@ Visit [https://docs.deepstack.cc/getting-started](https://docs.deepstack.cc/gett
     - [Install Golang](https://golang.org)
     - [Install Docker](https://docker.com)
     - [Install GIT](https://git-scm.com)
-    - [Install GIT LFS](https://github.com/git-lfs/git-lfs/wiki/Installation)
+    - [Install GIT LFS](https://github.com/git-lfs/git-lfs/wiki/Installation) 
+     (Read about [Git Large File Storage](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-storage-and-bandwidth-usage))
     - [Install Redis Server](https://redis.io/)
-    - [Install Python3.7](https://python.org)
+    - [Install Python3.10](https://python.org)
     - [Install Powershell 7+](https://docs.microsoft.com/en-us/powershell/scripting/windows-powershell/install/installing-windows-powershell?view=powershell-7.1)
 
 - **Clone DeepStack Repo** 
 
-    ```git clone https://github.com/johnolafenwa/DeepStack.git```
+    ```git clone https://github.com/codeproject/DeepStack.git```
 
 - **CD to DeepStack Repo Dir**
 
@@ -58,7 +59,9 @@ Visit [https://docs.deepstack.cc/getting-started](https://docs.deepstack.cc/gett
 - **Fetch Repo Files**
 
     ``git lfs pull``
+
 - **Download Binary Dependencies With Powershell**
+
     ```.\download_dependencies.ps1```
 
 - **Build DeepStack Server**

@@ -74,5 +74,5 @@ Once you've completed these steps then your machine should be setup correctly. N
 ## To build a standalone executable
 
 ```cmd
-go build -o server.exe server.go
+go build -o deepstack.exe server.go
 ```
