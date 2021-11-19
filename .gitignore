@@ -155,6 +155,7 @@ cython_debug/
 *.out
 
 deeptemp
+/.vs
 datastore
 logs/
 sharedfiles/face_lite.pt
